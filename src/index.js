@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './APP'; // Adjust path if necessary
-import './index.css'; // Optional: You can add global styles if needed
+import App from './APP'; 
+import './index.css'; 
 
 // Render the App component to the DOM
 ReactDOM.render(
