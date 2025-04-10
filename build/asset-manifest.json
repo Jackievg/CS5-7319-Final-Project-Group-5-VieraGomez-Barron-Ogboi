@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Jackievg/CS5-7319-Final-Project-Group-5-VieraGomez-Barron-Ogboi/static/css/main.2ad57006.css",
+    "main.js": "/Jackievg/CS5-7319-Final-Project-Group-5-VieraGomez-Barron-Ogboi/static/js/main.89ed80ae.js",
+    "index.html": "/Jackievg/CS5-7319-Final-Project-Group-5-VieraGomez-Barron-Ogboi/index.html",
+    "main.2ad57006.css.map": "/Jackievg/CS5-7319-Final-Project-Group-5-VieraGomez-Barron-Ogboi/static/css/main.2ad57006.css.map",
+    "main.89ed80ae.js.map": "/Jackievg/CS5-7319-Final-Project-Group-5-VieraGomez-Barron-Ogboi/static/js/main.89ed80ae.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.2ad57006.css",
+    "static/js/main.89ed80ae.js"
+  ]
+}

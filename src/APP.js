@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { authService } from './services/API';
+import { authService } from './services/API.js';
 
 // Components
 import Navbar from './components/Navbar';
@@ -19,6 +19,7 @@ function App() {
   useEffect(() => {
     // Check if user is logged in
     const currentUser = authService.getCurrentUser();
+    console.log("Current user:", currentUser); 
     setUser(currentUser);
     setLoading(false);
   }, []);

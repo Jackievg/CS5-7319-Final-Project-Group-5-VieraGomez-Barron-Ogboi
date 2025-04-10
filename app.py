@@ -1,5 +1,4 @@
-# from flask import Flaskpip 
-from flask import Flask 
+from flask import Flask, render_template
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
@@ -8,24 +7,28 @@ db = SQLAlchemy()
 jwt = JWTManager()
 
 def create_app(config_object="Config.DevelopmentConfig"):
-	app = Flask(__name__)
-	app.config.from_object(config_object)
-	
-	CORS(app)
-	db.init_app(app)
-	jwt.init_app(app)
-	
-	from RoutesTask import tasks_bp
-	from RoutesUsers import users_bp
+    app = Flask(__name__)
+    app.config.from_object(config_object)
 
-	app.register_blueprint(tasks_bp, url_prefix='/api/tasks')
-	app.register_blueprint(users_bp, url_prefix='/api/users')
+    CORS(app)
+    db.init_app(app)
+    jwt.init_app(app)
 
-	with app.app_context():
-		db.create_all()
+    from RoutesTask import tasks_bp
+    from RoutesUsers import users_bp
 
-	return app
+    app.register_blueprint(tasks_bp, url_prefix='/api/tasks')
+    app.register_blueprint(users_bp, url_prefix='/api/users')
 
-if __name__ == "_main_":
-	app = create_app()
-	app.run(debug=True)
+    @app.route('/')
+    def index():
+        return render_template('index.html')
+
+    with app.app_context():
+        db.create_all()
+
+    return app
+
+if __name__ == "__main__":
+    app = create_app()
+    app.run(debug=True)
