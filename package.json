@@ -1,0 +1,28 @@
+{
+  "name": "taskmanager",
+  "version": "1.0.0",
+  "description": "task manager application project",
+  "main": "index.js",
+  "scripts": {
+    "test": "taskman"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jackievg/CS5-7319-Final-Project-Group-5-VieraGomez-Barron-Ogboi.git"
+  },
+  "keywords": [
+    "task"
+  ],
+  "author": "jackie briana marione",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jackievg/CS5-7319-Final-Project-Group-5-VieraGomez-Barron-Ogboi/issues"
+  },
+  "homepage": "https://github.com/Jackievg/CS5-7319-Final-Project-Group-5-VieraGomez-Barron-Ogboi#readme",
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.5.0",
+    "react-scripts": "^5.0.1"
+  }
+}
