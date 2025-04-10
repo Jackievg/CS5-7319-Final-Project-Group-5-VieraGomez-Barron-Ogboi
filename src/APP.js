@@ -3,14 +3,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { authService } from './services/API.js';
 
 // Components
-import Navbar from './components/Navbar';
-import Login from './components/Login';
-//import Register from './components/Register';
-import Dashboard from './components/Dashboard';
-//import TaskDetail from './components/TaskDetail';
-//import CreateTask from './components/CreateTask';
-//import PTO from './components/PTO';
-//import CompanyCalendar from './components/CompanyCalendar';
+import Navbar from './components/Navbar.js';
+import Login from './components/Login.js';
+import Register from './components/Register';
+import Dashboard from './components/Dashboard.js';
+import TaskDetail from './components/TaskDetail';
+import CreateTask from './components/CreateTask';
+import PTO from './components/PTO';
+import CompanyCalendar from './components/CompanyCalendar';
 
 function App() {
   const [user, setUser] = useState(null);
