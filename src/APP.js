@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { authService } from './services/api';
+import { authService } from './services/API';
 
 // Components
 import Navbar from './components/Navbar';
 import Login from './components/Login';
-import Register from './components/Register';
+//import Register from './components/Register';
 import Dashboard from './components/Dashboard';
-import TaskDetail from './components/TaskDetail';
-import CreateTask from './components/CreateTask';
-import PTO from './components/PTO';
-import CompanyCalendar from './components/CompanyCalendar';
+//import TaskDetail from './components/TaskDetail';
+//import CreateTask from './components/CreateTask';
+//import PTO from './components/PTO';
+//import CompanyCalendar from './components/CompanyCalendar';
 
 function App() {
   const [user, setUser] = useState(null);
