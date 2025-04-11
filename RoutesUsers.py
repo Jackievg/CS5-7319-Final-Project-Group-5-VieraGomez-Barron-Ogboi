@@ -56,14 +56,8 @@ def login():
 @jwt_required()
 def request_pto():
     current_user_id = get_jwt_identity()
-    data = request.get_json()
-
-    print("Inside PTO POST route")
-    print("Request content type:", request.content_type)
-    print("Raw data:", request.data)
-
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)
         print("Parsed JSON:", data)
     except Exception as e:
         print("Failed to parse JSON:", e)

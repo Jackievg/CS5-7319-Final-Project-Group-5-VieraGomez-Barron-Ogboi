@@ -1,14 +1,40 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const navigate = useNavigate(); // Use useNavigate instead of useHistory
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const userData = { username, password, access_token: 'dummyToken' };
-    onLogin(userData);
+    
+    const userData = { username, password };
+
+    // Make the login request to the backend
+    axios.post('http://localhost:5000/login', userData)
+      .then(response => {
+        const { access_token, is_manager, user_id, username } = response.data;
+
+        // Store token and user data in localStorage
+        localStorage.setItem('access_token', access_token);
+        localStorage.setItem('is_manager', is_manager);
+        localStorage.setItem('user_id', user_id);
+        localStorage.setItem('username', username);
+
+        // Optionally call onLogin to update parent state (if needed)
+        onLogin({ username, access_token });
+
+        // Redirect to the home or dashboard page after login
+        navigate('/dashboard');  // Use navigate for redirection
+      })
+      .catch(error => {
+        console.error('Error during login:', error);
+        setErrorMessage('Invalid username or password.');
+      });
   };
 
   return (
@@ -45,6 +71,9 @@ const Login = ({ onLogin }) => {
           <button type="submit" className="btn btn-primary w-100">Login</button>
         </form>
 
+        {/* Display error message if login fails */}
+        {errorMessage && <p className="text-danger mt-3">{errorMessage}</p>}
+
         <div className="text-center mt-3">
           <small>
             Don’t have an account? <Link to="/register">Register here</Link>
@@ -56,5 +85,6 @@ const Login = ({ onLogin }) => {
 };
 
 export default Login;
+
 
 

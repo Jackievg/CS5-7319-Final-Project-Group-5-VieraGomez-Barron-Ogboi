@@ -10,6 +10,7 @@ function PTO() {
 
   const token = localStorage.getItem('access_token');
   const isManager = localStorage.getItem('is_manager') === 'true'; // Assuming 'true' for manager
+  console.log("Token from localStorage:", token)
 
   useEffect(() => {
     if (token) {
@@ -30,6 +31,7 @@ function PTO() {
 
     // Create PTO request
     const data = { start_date: startDate, end_date: endDate, reason };
+    console.log("Submitting PTO request with:", { startDate, endDate, reason });
 
     axios.post('http://localhost:5000/pto', data, {
       headers: { Authorization: `Bearer ${token}` }
