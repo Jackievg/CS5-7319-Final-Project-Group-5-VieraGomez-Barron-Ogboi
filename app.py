@@ -9,9 +9,10 @@ jwt = JWTManager()
 
 def create_app(config_object=config.DevelopmentConfig):  # Reference the class within 'config'
     app = Flask(__name__)
-    app.config.from_object(config_object)
-
     CORS(app)
+    
+    app.config.from_object(config_object)
+    
     db.init_app(app)
     jwt.init_app(app)
 
@@ -19,7 +20,7 @@ def create_app(config_object=config.DevelopmentConfig):  # Reference the class w
     from RoutesUsers import users_bp
 
     app.register_blueprint(tasks_bp, url_prefix='/api/tasks')
-    app.register_blueprint(users_bp, url_prefix='/api/users')
+    app.register_blueprint(users_bp)
 
     @app.route('/')
     def index():
