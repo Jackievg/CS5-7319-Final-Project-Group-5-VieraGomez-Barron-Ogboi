@@ -6,12 +6,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 // Components
 import Navbar from './components/Navbar.js';
 import Login from './components/Login.js';
-import Register from './components/Register';
+import Register from './components/Register.js';
 import Dashboard from './components/Dashboard.js';
-import TaskDetail from './components/TaskDetail';
-import CreateTask from './components/CreateTask';
-import PTO from './components/PTO';
-import CompanyCalendar from './components/CompanyCalendar';
+import TaskDetail from './components/TaskDetail.js';
+import CreateTask from './components/CreateTask.js';
+import PTO from './components/PTO.js';
+import CompanyCalendar from './components/CompanyCalendar.js';
 
 function App() {
   const [user, setUser] = useState(null);
