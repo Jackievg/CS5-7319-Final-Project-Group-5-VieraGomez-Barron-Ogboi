@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from datetime import datetime
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from models import User, PTORequest
 from app import db
@@ -50,49 +51,45 @@ def login():
         'is_manager': user.is_manager
     }), 200
 
+
 @users_bp.route('/pto', methods=['POST'])
 @jwt_required()
 def request_pto():
     current_user_id = get_jwt_identity()
     data = request.get_json()
-    
+
+    print("Inside PTO POST route")
+    print("Request content type:", request.content_type)
+    print("Raw data:", request.data)
+
+    try:
+        data = request.get_json()
+        print("Parsed JSON:", data)
+    except Exception as e:
+        print("Failed to parse JSON:", e)
+        return jsonify({'message': 'Bad JSON'}), 400
+
+    if not data:
+        return jsonify({'message': 'No data received'}), 400
+    print("Received data:", data)
+
+    try:
+        start_date = datetime.strptime(data['start_date'], '%Y-%m-%d').date()
+        end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
+    except (ValueError, KeyError):
+        return jsonify({'message': 'Invalid or missing date format. Use YYYY-MM-DD.'}), 422
+
     new_pto = PTORequest(
-        start_date=data['start_date'],
-        end_date=data['end_date'],
+        start_date=start_date,
+        end_date=end_date,
         reason=data.get('reason', ''),
         user_id=current_user_id
     )
-    
+
     db.session.add(new_pto)
     db.session.commit()
-    
-    return jsonify({'message': 'PTO request submitted successfully', 'id': new_pto.id}), 201
 
-@users_bp.route('/pto', methods=['GET'])
-@jwt_required()
-def get_pto_requests():
-    current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
-    
-    if user.is_manager:
-        # Managers can see all PTO requests
-        pto_requests = PTORequest.query.all()
-    else:
-        # Regular users can only see their own requests
-        pto_requests = PTORequest.query.filter_by(user_id=current_user_id).all()
-    
-    result = []
-    for pto in pto_requests:
-        result.append({
-            'id': pto.id,
-            'start_date': pto.start_date.isoformat(),
-            'end_date': pto.end_date.isoformat(),
-            'reason': pto.reason,
-            'status': pto.status,
-            'requester': User.query.get(pto.user_id).username
-        })
-    
-    return jsonify(result), 200
+    return jsonify({'message': 'PTO request submitted successfully', 'id': new_pto.id}), 201
 
 @users_bp.route('/pto/<int:pto_id>', methods=['PUT'])
 @jwt_required()
