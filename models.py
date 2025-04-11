@@ -1,5 +1,5 @@
 from datetime import datetime
-from app import db
+from extensions import db 
 from flask_bcrypt import generate_password_hash, check_password_hash
 
 class User(db.Model):
@@ -10,7 +10,7 @@ class User(db.Model):
     is_manager = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     tasks = db.relationship('Task', backref='owner', lazy=True)
-    pto_requests = db.relationship('PTORequest', backref='requester', lazy=True)
+    pto_requests = db.relationship('PTORequest', backref='requester', lazy=True, foreign_keys='PTORequest.user_id')
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password).decode('utf-8')

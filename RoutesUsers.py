@@ -4,6 +4,7 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identi
 from models import User, PTORequest
 from app import db
 
+
 users_bp = Blueprint('users', __name__)
 
 @users_bp.route('/register', methods=['POST'])

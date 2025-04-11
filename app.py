@@ -1,15 +1,12 @@
 from flask import Flask, render_template
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
+from extensions import db, jwt
 import config  # Import the config module correctly
 
-db = SQLAlchemy()
-jwt = JWTManager()
 
 def create_app(config_object=config.DevelopmentConfig):  # Reference the class within 'config'
     app = Flask(__name__)
-    CORS(app)
+    CORS(app, origins="http://localhost:3000", supports_credentials=True)
     
     app.config.from_object(config_object)
     
