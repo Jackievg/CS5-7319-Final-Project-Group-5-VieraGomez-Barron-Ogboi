@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from datetime import datetime
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from models import User, PTORequest
-from app import db
+from extensions import db
 
 
 users_bp = Blueprint('users', __name__)
@@ -56,6 +56,7 @@ def login():
 @users_bp.route('/pto', methods=['POST'])
 @jwt_required()
 def request_pto():
+
     current_user_id = get_jwt_identity()
     try:
         data = request.get_json(force=True)

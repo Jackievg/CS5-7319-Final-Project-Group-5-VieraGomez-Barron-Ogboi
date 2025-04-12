@@ -2,9 +2,9 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 from models import Task, TaskShare, User, CompanyEvent
-from app import db
+from extensions import db
 
-tasks_bp = Blueprint('tasks', __name__)
+tasks_bp = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 @tasks_bp.route('/', methods=['GET'])
 @jwt_required()
@@ -55,6 +55,9 @@ def get_tasks():
 def create_task():
     current_user_id = get_jwt_identity()
     data = request.get_json()
+
+    print("🔍 Incoming JSON data:", data)
+    print("🪪 Current user ID:", current_user_id)
     
     new_task = Task(
         title=data['title'],

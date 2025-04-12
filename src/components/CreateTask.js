@@ -17,9 +17,11 @@ const CreateTask = () => {
         deadline: dueDate,
         shared_with: sharedWith 
       };
+
+      console.log("📦 Sending task data:", taskData);
   
       try {
-        const response = await fetch('/tasks', {
+        const response = await fetch('http://localhost:5000/tasks', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
