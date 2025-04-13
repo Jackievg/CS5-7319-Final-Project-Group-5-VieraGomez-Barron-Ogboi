@@ -55,9 +55,6 @@ def get_tasks():
 def create_task():
     current_user_id = get_jwt_identity()
     data = request.get_json()
-
-    print("🔍 Incoming JSON data:", data)
-    print("🪪 Current user ID:", current_user_id)
     
     new_task = Task(
         title=data['title'],

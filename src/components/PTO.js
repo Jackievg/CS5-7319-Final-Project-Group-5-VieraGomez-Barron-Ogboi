@@ -9,8 +9,7 @@ function PTO() {
   const [statusMessage, setStatusMessage] = useState('');
 
   const token = localStorage.getItem('access_token');
-  const isManager = localStorage.getItem('is_manager') === 'true'; // Assuming 'true' for manager
-  console.log("Token from localStorage:", token)
+  const isManager = localStorage.getItem('is_manager') === 'true';
 
   useEffect(() => {
     if (token) {
@@ -28,10 +27,7 @@ function PTO() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Create PTO request
     const data = { start_date: startDate, end_date: endDate, reason };
-    console.log("Submitting PTO request with:", { startDate, endDate, reason });
 
     axios.post('http://localhost:5000/pto', data, {
       headers: { Authorization: `Bearer ${token}` }
@@ -41,6 +37,8 @@ function PTO() {
       setStartDate('');
       setEndDate('');
       setReason('');
+      // Refresh list
+      setPtoRequests(prev => [...prev, response.data]);
     })
     .catch(error => {
       setStatusMessage('Error submitting PTO request.');
@@ -49,7 +47,6 @@ function PTO() {
   };
 
   const handleStatusChange = (ptoId, newStatus) => {
-    // Manager updates PTO request status (approve/reject)
     const data = { status: newStatus };
 
     axios.put(`http://localhost:5000/pto/${ptoId}`, data, {
@@ -57,7 +54,6 @@ function PTO() {
     })
     .then(response => {
       setStatusMessage(`PTO request ${newStatus} successfully.`);
-      // Refresh the PTO requests after status update
       setPtoRequests(prevState =>
         prevState.map(request =>
           request.id === ptoId ? { ...request, status: newStatus } : request
@@ -71,65 +67,64 @@ function PTO() {
   };
 
   return (
-    <div>
-      <h2>PTO Requests</h2>
-      
-      {/* Display status message */}
-      {statusMessage && <p>{statusMessage}</p>}
+    <div className="container mt-5">
+      <h2 className="mb-4">PTO Requests</h2>
 
-      {/* PTO Request Form */}
+      {statusMessage && (
+        <div className="alert alert-info">{statusMessage}</div>
+      )}
+
       {!isManager && (
-        <form onSubmit={handleSubmit}>
-          <label>
-            Start Date:
+        <form onSubmit={handleSubmit} className="mb-4 card p-4 shadow-sm">
+          <h4 className="mb-3">Submit a PTO Request</h4>
+          <div className="mb-3">
+            <label className="form-label">Start Date</label>
             <input
               type="date"
+              className="form-control"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
               required
             />
-          </label>
-          <br />
-          <label>
-            End Date:
+          </div>
+          <div className="mb-3">
+            <label className="form-label">End Date</label>
             <input
               type="date"
+              className="form-control"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
               required
             />
-          </label>
-          <br />
-          <label>
-            Reason:
+          </div>
+          <div className="mb-3">
+            <label className="form-label">Reason</label>
             <input
               type="text"
+              className="form-control"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
+              placeholder="Optional"
             />
-          </label>
-          <br />
-          <button type="submit">Submit PTO Request</button>
+          </div>
+          <button type="submit" className="btn btn-primary">Submit</button>
         </form>
       )}
 
-      {/* Display PTO requests for users */}
-      <h3>Your PTO Requests</h3>
-      <ul>
+      <h4 className="mb-3">Your PTO Requests</h4>
+      <ul className="list-group">
         {ptoRequests.map(pto => (
-          <li key={pto.id}>
-            {pto.start_date} to {pto.end_date} - {pto.status}
-            {!isManager && pto.status === 'Pending' && (
-              <span> (Waiting for approval)</span>
-            )}
+          <li key={pto.id} className="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{pto.start_date}</strong> to <strong>{pto.end_date}</strong> - <span className={`badge bg-${pto.status === 'Approved' ? 'success' : pto.status === 'Declined' ? 'danger' : 'secondary'}`}>{pto.status}</span>
+              {!isManager && pto.status === 'Pending' && (
+                <small className="text-muted ms-2">(Waiting for approval)</small>
+              )}
+            </div>
             {isManager && pto.status === 'Pending' && (
-              <div>
-                <button onClick={() => handleStatusChange(pto.id, 'Approved')}>
-                  Approve
-                </button>
-                <button onClick={() => handleStatusChange(pto.id, 'Declined')}>
-                  Decline
-                </button>
+              <div className="btn-group">
+                <button className="btn btn-outline-success btn-sm" onClick={() => handleStatusChange(pto.id, 'Approved')}>Approve</button>
+                <button className="btn btn-outline-danger btn-sm" onClick={() => handleStatusChange(pto.id, 'Declined')}>Decline</button>
               </div>
             )}
           </li>
@@ -140,4 +135,5 @@ function PTO() {
 }
 
 export default PTO;
+
 
