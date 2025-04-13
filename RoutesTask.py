@@ -10,7 +10,7 @@ tasks_bp = Blueprint('tasks', __name__, url_prefix='/tasks')
 @tasks_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_tasks():
-    current_user_id = get_jwt_identity()
+    current_user_id =int(get_jwt_identity())
     
     # Get user's own tasks
     own_tasks = Task.query.filter_by(user_id=current_user_id).all()
@@ -95,7 +95,7 @@ def create_task():
 @tasks_bp.route('/<int:task_id>', methods=['GET'])
 @jwt_required()
 def get_task(task_id):
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     task = Task.query.get(task_id)
     
     if not task:
@@ -131,7 +131,7 @@ def get_task(task_id):
 @tasks_bp.route('/<int:task_id>', methods=['PUT'])
 @jwt_required()
 def update_task(task_id):
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     task = Task.query.get(task_id)
     
     if not task:
@@ -176,7 +176,7 @@ def update_task(task_id):
 @tasks_bp.route('/<int:task_id>', methods=['DELETE'])
 @jwt_required()
 def delete_task(task_id):
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     task = Task.query.get(task_id)
     
     if not task:
@@ -216,7 +216,7 @@ def get_company_events():
 @tasks_bp.route('/events', methods=['POST'])
 @jwt_required()
 def create_company_event():
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     # Only managers can create company events

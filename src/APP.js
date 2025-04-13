@@ -12,6 +12,7 @@ import TaskDetail from './components/TaskDetail.js';
 import CreateTask from './components/CreateTask.js';
 import PTO from './components/PTO.js';
 import CompanyCalendar from './components/CompanyCalendar.js';
+import EditTask from './components/EditTask.js';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -53,6 +54,7 @@ function App() {
             <Route path="/create-task" element={user ? <CreateTask /> : <Navigate to="/login" />} />
             <Route path="/pto" element={user ? <PTO /> : <Navigate to="/login" />} />
             <Route path="/calendar" element={user ? <CompanyCalendar /> : <Navigate to="/login" />} />
+            <Route path="/tasks/:id/edit" element={user ? <EditTask /> : <Navigate to="/login" />} />
           </Routes>
         </div>
       </div>

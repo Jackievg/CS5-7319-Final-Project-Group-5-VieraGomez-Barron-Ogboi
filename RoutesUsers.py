@@ -57,7 +57,7 @@ def login():
 @jwt_required()
 def request_pto():
 
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     try:
         data = request.get_json(force=True)
         print("Parsed JSON:", data)
