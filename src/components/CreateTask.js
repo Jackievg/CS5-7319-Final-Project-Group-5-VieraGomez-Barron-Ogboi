@@ -21,11 +21,15 @@ const CreateTask = () => {
       console.log("📦 Sending task data:", taskData);
   
       try {
+
+        const token = localStorage.getItem('access_token');
+        console.log('Token from localStorage:', token);
+
         const response = await fetch('http://localhost:5000/tasks', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify(taskData),
         });

@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 from models import Task, TaskShare, User, CompanyEvent
 from extensions import db
+from flask import current_app
 
 tasks_bp = Blueprint('tasks', __name__, url_prefix='/tasks')
 
@@ -53,37 +54,43 @@ def get_tasks():
 @tasks_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_task():
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity()) 
     data = request.get_json()
     
-    new_task = Task(
+    try:
+        new_task = Task(
         title=data['title'],
         description=data.get('description', ''),
-        deadline=datetime.fromisoformat(data['deadline']) if 'deadline' in data else None,
+        deadline=datetime.strptime(data['deadline'], '%Y-%m-%d') if 'deadline' in data else None,
         category=data.get('category', 'work'),
         user_id=current_user_id
-    )
-    
-    db.session.add(new_task)
-    db.session.commit()
+        )
+
+        db.session.add(new_task)
+        db.session.commit()
     
     # Handle task sharing if specified
-    if 'shared_with' in data and data['shared_with']:
-        for username in data['shared_with']:
-            user = User.query.filter_by(username=username).first()
-            if user:
-                task_share = TaskShare(
+        if 'shared_with' in data and data['shared_with']:
+            for username in data['shared_with']:
+                user = User.query.filter_by(username=username).first()
+                if user:
+                    task_share = TaskShare(
                     task_id=new_task.id,
                     shared_with_id=user.id
                 )
                 db.session.add(task_share)
         
-        db.session.commit()
+            db.session.commit()
     
-    return jsonify({
+        return jsonify({
         'message': 'Task created successfully',
         'id': new_task.id
-    }), 201
+        }), 201
+    except Exception as e:
+        current_app.logger.error(f"Error in create_task: {e}")
+        return jsonify({'message': 'Task creation failed', 'error': str(e)}), 422
+
+
 
 @tasks_bp.route('/<int:task_id>', methods=['GET'])
 @jwt_required()
