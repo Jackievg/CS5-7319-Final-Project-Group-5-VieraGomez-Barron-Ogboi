@@ -106,8 +106,7 @@ const CreateTask = () => {
           <Modal.Body>
             <p>Task has been successfully created!</p>
             <div className="d-flex justify-content-between">
-              <a href="/calendar" className="btn btn-success">Go to Calendar</a>
-              <a href="/dashboard" className="btn btn-secondary">Back to Dashboard</a>
+              <a href="/" className="btn btn-secondary">Back to Dashboard</a>
             </div>
           </Modal.Body>
         </Modal>

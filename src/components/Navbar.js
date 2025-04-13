@@ -15,9 +15,6 @@ const Navbar = ({ user, onLogout }) => {
             {user ? (
               <>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/dashboard">Dashboard</Link>
-                </li>
-                <li className="nav-item">
                   <button className="btn btn-link" onClick={onLogout}>Logout</button>
                 </li>
               </>
