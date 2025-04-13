@@ -44,7 +44,7 @@ const CreateTask = () => {
           setDueDate('');
           setSharedWith([]);
         } else {
-          console.error('Error creating task:', data.message);
+          console.error('Error creating task:', data.message || data.msg || 'Unknown error');
         }
       } catch (error) {
         console.error('Error:', error);
