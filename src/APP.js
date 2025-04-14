@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { authService } from './services/API.js';
-import { connectWebSocket, disconnectWebSocket } from './services/websocket';
+import { connectWebSocket, disconnectWebSocket } from './services/websocket.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Components
@@ -104,4 +104,3 @@ function App() {
 
 export default App;
 
-///chekc me 
