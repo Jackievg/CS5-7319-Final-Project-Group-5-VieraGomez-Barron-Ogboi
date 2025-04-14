@@ -23,15 +23,14 @@ function App() {
   useEffect(() => {
     // Check if user is logged in
     const currentUser = authService.getCurrentUser();
-    console.log("Current user:", currentUser); 
+   // console.log("Current user:", currentUser); 
+   //chnaged
     setUser(currentUser);
     setLoading(false);
 
-    if (currentUser) {
-      // Connect to WebSocket
+    if (currentUser && process.env.REACT_APP_USE_EVENTS === 'true') {
       const ws = connectWebSocket(currentUser.id, (message) => {
         console.log('Received message:', message);
-        // Global message handler can be added here if needed
       });
 
       ws.onConnect = () => setConnectionStatus('connected');
@@ -55,16 +54,20 @@ function App() {
 
     localStorage.setItem('user', JSON.stringify(userObj));
     localStorage.setItem('token', userData.access_token);
+    localStorage.setItem('access_token', userData.access_token); // Duplicate for compatibility
     setUser(userObj);
     // Connect WebSocket after login
-    const ws = connectWebSocket(userData.user_id, (message) => {
-      console.log('Received message after login:', message);
-    });
-    ws.onConnect = () => setConnectionStatus('connected');
+
+    if (process.env.REACT_APP_USE_EVENTS === 'true') {
+      const ws = connectWebSocket(userData.user_id, console.log);
+      ws.onConnect = () => setConnectionStatus('connected');
+    }
   };
 
   const handleLogout = () => {
-    disconnectWebSocket();
+    if (process.env.REACT_APP_USE_EVENTS === 'true') {
+      disconnectWebSocket();
+    }
     authService.logout();
     setUser(null);
     setConnectionStatus('disconnected');
@@ -100,3 +103,5 @@ function App() {
 }
 
 export default App;
+
+///chekc me 
