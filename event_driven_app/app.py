@@ -15,6 +15,17 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 db.init_app(app)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
+# Import and register blueprints
+from routes.user_routes import bp as user_bp
+from routes.task_routes import bp as task_bp
+from routes.pto_routes import bp as pto_bp
+from routes.event_routes import bp as event_bp
+
+app.register_blueprint(user_bp)
+app.register_blueprint(task_bp)
+app.register_blueprint(pto_bp)
+app.register_blueprint(event_bp)
+
 # Add health check route BEFORE registering socket handlers
 @app.route('/api/health')
 def health_check():
