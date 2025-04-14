@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { sendMessage } from './websocket';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+//removed api for localhost
 const WS_URL = process.env.REACT_APP_WS_URL || 'http://localhost:8080';
 
 
@@ -16,7 +17,7 @@ const api = axios.create({
 // Add request interceptor to include JWT token in requests
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || localStorage.getItem('access_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,74 +26,71 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Hybrid service methods
-const createWithRealtime = async (endpoint, data, eventType) => {
-  const response = await api.post(endpoint, data);
-  sendMessage(`/app/${endpoint}`, {
-    eventType,
-    payload: response.data
-  });
-  return response;
+// Helper function to maintain compatibility
+const fetchWithFallback = async (url, options = {}) => {
+  try {
+    const response = await fetch(`${API_URL}${url}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('access_token')}`,
+        ...options.headers
+      }
+    });
+    if (!response.ok) throw new Error('Network response was not ok');
+    return await response.json();
+  } catch (error) {
+    console.error('Fetch error, trying axios:', error);
+    // Fallback to axios
+    const method = options.method || 'GET';
+    try {
+      const axiosResponse = await api({
+        method,
+        url,
+        data: options.body ? JSON.parse(options.body) : undefined
+      });
+      return axiosResponse.data;
+    } catch (axiosError) {
+      console.error('Both fetch and axios failed:', axiosError);
+      throw axiosError;
+    }
+  }
 };
 
-const updateWithRealtime = async (endpoint, id, data, eventType) => {
-  const response = await api.put(`${endpoint}/${id}`, data);
-  sendMessage(`/app/${endpoint}.update`, {
-    eventType,
-    payload: response.data
-  });
-  return response;
-};
-
-const deleteWithRealtime = async (endpoint, id, eventType) => {
-  const response = await api.delete(`${endpoint}/${id}`);
-  sendMessage(`/app/${endpoint}.delete`, {
-    eventType,
-    payload: { id }
-  });
-  return response;
-};
 
 
 // Auth services
 export const authService = {
-  register: (userData) => api.post('/users/register', userData),
-  login: (credentials) => api.post('/users/login', credentials),
+  //took /users/
+  register: (userData) => api.post('/register', userData),
+  login: (credentials) => api.post('/login', credentials),
   getCurrentUser: () => {
     const userStr = localStorage.getItem('user');
     return userStr ? JSON.parse(userStr) : null;
   },
   logout: () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('access_token');
     localStorage.removeItem('user');
   },
-};
-//stoped here 
+};//checking if works
+
+
 // Task services
 export const taskService = {
-  getTasks: () => api.get('/tasks'),
-  getTask: (id) => api.get(`/tasks/${id}`),
-  createTask: (taskData) => createWithRealtime('/tasks', taskData, 'TASK_CREATED'),
-  updateTask: (id, taskData) => updateWithRealtime('/tasks', id, taskData, 'TASK_UPDATED'),
-  deleteTask: (id) => deleteWithRealtime('/tasks', id, 'TASK_DELETED'),
-  
-  // Hybrid method for realtime updates
-  subscribeToUpdates: (userId, callback) => {
-    return connectWebSocket(userId, callback);
-  }
+  getTasks: () => fetchWithFallback('/tasks'),
+  getTask: (id) => fetchWithFallback(`/tasks/${id}`),
+  createTask: (taskData) => api.post('/tasks', taskData),
+  updateTask: (id, taskData) => api.put(`/tasks/${id}`, taskData),
+  deleteTask: (id) => api.delete(`/tasks/${id}`),
 };
+
 
 // PTO services
 export const ptoService = {
-  requestPTO: (ptoData) => createWithRealtime('/users/pto', ptoData, 'PTO_CREATED'),
-  getPTORequests: () => api.get('/users/pto'),
-  updatePTOStatus: (id, statusData) => updateWithRealtime('/users/pto', id, statusData, 'PTO_UPDATED'),
-};
-
-// Company event services
-export const eventService = {
-  getEvents: () => api.get('/tasks/events'),
-  createEvent: (eventData) => createWithRealtime('/tasks/events', eventData, 'EVENT_CREATED'),
+  requestPTO: (ptoData) => api.post('/pto', ptoData),
+  getPTORequests: () => fetchWithFallback('/pto'),
+  updatePTOStatus: (id, statusData) => api.put(`/pto/${id}`, statusData),
 };
 
 export default api;
