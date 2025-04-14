@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { connectWebSocket, disconnectWebSocket, sendMessage } from '../services/websocket';
 
 const TaskDetail = () => {
   const { id } = useParams();
@@ -35,6 +36,24 @@ const TaskDetail = () => {
     };
 
     fetchTask();
+
+    // Set up WebSocket for real-time updates
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.id) {
+      const ws = connectWebSocket(user.id, (message) => {
+        if (message.eventType === 'TASK_UPDATED' && message.task.id === parseInt(id)) {
+          setTask(message.task);
+          setTaskData({
+            title: message.task.title,
+            description: message.task.description,
+            deadline: message.task.deadline,
+            category: message.task.category,
+          });
+        }
+      });
+
+      return () => disconnectWebSocket();
+    }
   }, [id, token]);
 
   // Handle task data change (for editing)
@@ -58,6 +77,13 @@ const TaskDetail = () => {
 
     if (response.ok) {
       const updatedTask = await response.json();
+      
+      // Notify via WebSocket
+      sendMessage('/app/tasks.update', {
+        eventType: 'TASK_UPDATED',
+        task: updatedTask
+      });
+
       setTask(updatedTask);
       setIsEditing(false); // Exit edit mode
     } else {
@@ -75,6 +101,13 @@ const TaskDetail = () => {
     });
 
     if (response.ok) {
+
+      // Notify via WebSocket
+      sendMessage('/app/tasks.delete', {
+        eventType: 'TASK_DELETED',
+        taskId: parseInt(id)
+      });
+
       navigate('/tasks'); // Redirect to tasks list after deletion
     } else {
       console.error('Error deleting task');

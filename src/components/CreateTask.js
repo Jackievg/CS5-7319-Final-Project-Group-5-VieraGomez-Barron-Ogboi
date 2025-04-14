@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Modal } from 'react-bootstrap';
+import { sendMessage } from '../services/websocket';
 
 
 const CreateTask = () => {
@@ -37,6 +38,12 @@ const CreateTask = () => {
         const data = await response.json();
   
         if (response.ok) {
+          // Send WebSocket notification after successful REST creation
+          sendMessage('/app/tasks.create', {
+            eventType: 'TASK_CREATED',
+            task: data
+          });
+
           console.log('Task created successfully:', data);
           setShowModal(true);
           setTitle('');

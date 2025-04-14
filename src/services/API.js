@@ -1,6 +1,9 @@
 import axios from 'axios';
+import { sendMessage } from './websocket';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const WS_URL = process.env.REACT_APP_WS_URL || 'http://localhost:8080';
+
 
 // Create axios instance with default config
 const api = axios.create({
@@ -22,6 +25,35 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Hybrid service methods
+const createWithRealtime = async (endpoint, data, eventType) => {
+  const response = await api.post(endpoint, data);
+  sendMessage(`/app/${endpoint}`, {
+    eventType,
+    payload: response.data
+  });
+  return response;
+};
+
+const updateWithRealtime = async (endpoint, id, data, eventType) => {
+  const response = await api.put(`${endpoint}/${id}`, data);
+  sendMessage(`/app/${endpoint}.update`, {
+    eventType,
+    payload: response.data
+  });
+  return response;
+};
+
+const deleteWithRealtime = async (endpoint, id, eventType) => {
+  const response = await api.delete(`${endpoint}/${id}`);
+  sendMessage(`/app/${endpoint}.delete`, {
+    eventType,
+    payload: { id }
+  });
+  return response;
+};
+
+
 // Auth services
 export const authService = {
   register: (userData) => api.post('/users/register', userData),
@@ -35,27 +67,32 @@ export const authService = {
     localStorage.removeItem('user');
   },
 };
-
+//stoped here 
 // Task services
 export const taskService = {
   getTasks: () => api.get('/tasks'),
   getTask: (id) => api.get(`/tasks/${id}`),
-  createTask: (taskData) => api.post('/tasks', taskData),
-  updateTask: (id, taskData) => api.put(`/tasks/${id}`, taskData),
-  deleteTask: (id) => api.delete(`/tasks/${id}`),
+  createTask: (taskData) => createWithRealtime('/tasks', taskData, 'TASK_CREATED'),
+  updateTask: (id, taskData) => updateWithRealtime('/tasks', id, taskData, 'TASK_UPDATED'),
+  deleteTask: (id) => deleteWithRealtime('/tasks', id, 'TASK_DELETED'),
+  
+  // Hybrid method for realtime updates
+  subscribeToUpdates: (userId, callback) => {
+    return connectWebSocket(userId, callback);
+  }
 };
 
 // PTO services
 export const ptoService = {
-  requestPTO: (ptoData) => api.post('/users/pto', ptoData),
+  requestPTO: (ptoData) => createWithRealtime('/users/pto', ptoData, 'PTO_CREATED'),
   getPTORequests: () => api.get('/users/pto'),
-  updatePTOStatus: (id, statusData) => api.put(`/users/pto/${id}`, statusData),
+  updatePTOStatus: (id, statusData) => updateWithRealtime('/users/pto', id, statusData, 'PTO_UPDATED'),
 };
 
 // Company event services
 export const eventService = {
   getEvents: () => api.get('/tasks/events'),
-  createEvent: (eventData) => api.post('/tasks/events', eventData),
+  createEvent: (eventData) => createWithRealtime('/tasks/events', eventData, 'EVENT_CREATED'),
 };
 
 export default api;

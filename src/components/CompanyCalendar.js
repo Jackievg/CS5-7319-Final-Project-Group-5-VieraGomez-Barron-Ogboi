@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
+import { connectWebSocket, disconnectWebSocket } from '../services/websocket'; // for event driven
+
 
 const CompanyCalendar = () => {
   const [tasks, setTasks] = useState([]);
@@ -29,6 +31,25 @@ const CompanyCalendar = () => {
     };
 
     fetchTasks();
+    
+    // Set up WebSocket for real-time updates (event-driven)
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.id) {
+      const ws = connectWebSocket(user.id, (message) => {
+        if (message.eventType === 'TASK_UPDATED') {
+          setTasks(prev => prev.map(t => t.id === message.task.id ? message.task : t));
+        } else if (message.eventType === 'TASK_CREATED') {
+          setTasks(prev => [...prev, message.task]);
+        } else if (message.eventType === 'TASK_DELETED') {
+          setTasks(prev => prev.filter(t => t.id !== message.taskId));
+        }
+      });
+
+      return () => {
+        disconnectWebSocket();
+      };
+    }
+
   }, []);
 
   const tileContent = ({ date, view }) => {

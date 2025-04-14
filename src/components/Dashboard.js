@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { authService } from '../services/API.js';
+import { connectWebSocket, disconnectWebSocket, sendMessage } from '../services/websocket';
+
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
@@ -28,6 +30,25 @@ const Dashboard = () => {
     };
 
     fetchTasks();
+
+// Set up WebSocket for real-time updates
+const user = JSON.parse(localStorage.getItem('user'));
+if (user && user.id) {
+  const ws = connectWebSocket(user.id, (message) => {
+    if (message.eventType === 'TASK_UPDATED') {
+      setTasks(prev => prev.map(t => t.id === message.task.id ? message.task : t));
+    } else if (message.eventType === 'TASK_CREATED') {
+      setTasks(prev => [...prev, message.task]);
+    } else if (message.eventType === 'TASK_DELETED') {
+      setTasks(prev => prev.filter(t => t.id !== message.taskId));
+    }
+  });
+
+  return () => {
+    disconnectWebSocket();
+  };
+}
+
   }, []);
 
   const handleEdit = (taskId) => {
@@ -45,6 +66,11 @@ const Dashboard = () => {
     });
 
     if (response.ok) {
+      //WebSocket notification after successful REST deletion
+      sendMessage('/app/tasks.delete', {
+        eventType: 'TASK_DELETED',
+        taskId: taskId
+      });
       setTasks(tasks.filter(task => task.id !== taskId));
     } else {
       console.error('Error deleting task');

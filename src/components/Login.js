@@ -19,14 +19,28 @@ const Login = ({ onLogin }) => {
       .then(response => {
         const { access_token, is_manager, user_id, username } = response.data;
 
+        // Store user data including ID for WebSocket
+        localStorage.setItem('user', JSON.stringify({
+          id: user_id,
+          username,
+          isManager: is_manager,
+          token: access_token
+        }));
+
         // Store token and user data in localStorage
         localStorage.setItem('access_token', access_token);
         localStorage.setItem('is_manager', is_manager);
         localStorage.setItem('user_id', user_id);
         localStorage.setItem('username', username);
 
-        // Optionally call onLogin to update parent state (if needed)
-        onLogin({ username, access_token });
+        // change back to uncommented if doesnt func properly
+        //onLogin({ username, access_token });
+        onLogin({ 
+          id: user_id,
+          username, 
+          access_token,
+          isManager: is_manager
+        });
 
         // Redirect to the home or dashboard page after login
         navigate('/dashboard');  // Use navigate for redirection

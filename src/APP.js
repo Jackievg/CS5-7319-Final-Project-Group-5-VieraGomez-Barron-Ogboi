@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { authService } from './services/API.js';
+import { connectWebSocket, disconnectWebSocket } from './services/websocket';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 // Components
@@ -17,6 +18,7 @@ import EditTask from './components/EditTask.js';
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
   useEffect(() => {
     // Check if user is logged in
@@ -24,17 +26,48 @@ function App() {
     console.log("Current user:", currentUser); 
     setUser(currentUser);
     setLoading(false);
+
+    if (currentUser) {
+      // Connect to WebSocket
+      const ws = connectWebSocket(currentUser.id, (message) => {
+        console.log('Received message:', message);
+        // Global message handler can be added here if needed
+      });
+
+      ws.onConnect = () => setConnectionStatus('connected');
+      ws.onStompError = () => setConnectionStatus('error');
+      ws.onWebSocketClose = () => setConnectionStatus('disconnected');
+
+      return () => {
+        disconnectWebSocket();
+      };
+    }
+
   }, []);
 
   const handleLogin = (userData) => {
-    localStorage.setItem('user', JSON.stringify(userData));
+    const userObj = {
+      id: userData.user_id,
+      username: userData.username,
+      isManager: userData.is_manager,
+      token: userData.access_token
+    };
+
+    localStorage.setItem('user', JSON.stringify(userObj));
     localStorage.setItem('token', userData.access_token);
-    setUser(userData);
+    setUser(userObj);
+    // Connect WebSocket after login
+    const ws = connectWebSocket(userData.user_id, (message) => {
+      console.log('Received message after login:', message);
+    });
+    ws.onConnect = () => setConnectionStatus('connected');
   };
 
   const handleLogout = () => {
+    disconnectWebSocket();
     authService.logout();
     setUser(null);
+    setConnectionStatus('disconnected');
   };
 
   if (loading) {
@@ -44,7 +77,11 @@ function App() {
   return (
     <Router>
       <div className="app">
-        <Navbar user={user} onLogout={handleLogout} />
+        <Navbar 
+          user={user} 
+          onLogout={handleLogout} 
+          connectionStatus={connectionStatus} 
+        />
         <div className="container mt-4">
           <Routes>
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login onLogin={handleLogin} />} />

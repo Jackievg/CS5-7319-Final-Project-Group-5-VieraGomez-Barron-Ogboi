@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { connectWebSocket, disconnectWebSocket } from '../services/websocket';
 
 function PTO() {
   const [startDate, setStartDate] = useState('');
@@ -18,10 +19,22 @@ function PTO() {
       })
       .then(response => {
         setPtoRequests(response.data);
-      })
-      .catch(error => {
-        console.error('Error fetching PTO requests:', error);
       });
+      // WebSocket connection for real-time updates
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user && user.id) {
+        const ws = connectWebSocket(user.id, (message) => {
+          if (message.eventType === 'PTO_UPDATED') {
+            setPtoRequests(prev => prev.map(req => 
+              req.id === message.pto.id ? message.pto : req
+            ));
+          } else if (message.eventType === 'PTO_CREATED') {
+            setPtoRequests(prev => [...prev, message.pto]);
+          }
+        });
+
+        return () => disconnectWebSocket();
+      }
     }
   }, [token]);
 

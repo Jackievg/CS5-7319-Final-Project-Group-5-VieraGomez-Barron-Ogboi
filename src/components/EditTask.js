@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { sendMessage } from '../services/websocket';
 
 const EditTask = () => {
   const { id } = useParams();
@@ -54,7 +55,12 @@ const EditTask = () => {
       body: JSON.stringify(form),
     })
       .then(res => res.json())
-      .then(() => {
+      .then((updatedTask) => {
+        // Send WebSocket notification after successful REST update
+        sendMessage('/app/tasks.update', {
+          eventType: 'TASK_UPDATED',
+          task: updatedTask
+        });
         navigate('/'); // Go back to dashboard after saving
       })
       .catch(err => console.error('Failed to update task:', err));
