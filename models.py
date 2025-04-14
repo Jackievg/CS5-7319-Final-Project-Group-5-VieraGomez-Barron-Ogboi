@@ -55,7 +55,7 @@ class PTORequest(db.Model):
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
     reason = db.Column(db.Text)
-    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    status = db.Column(db.String(20), default='Pending')  # pending, approved, rejected
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

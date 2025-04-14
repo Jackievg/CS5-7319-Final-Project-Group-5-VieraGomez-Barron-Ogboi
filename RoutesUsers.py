@@ -79,7 +79,8 @@ def request_pto():
         start_date=start_date,
         end_date=end_date,
         reason=data.get('reason', ''),
-        user_id=current_user_id
+        user_id=current_user_id,
+        status = 'Pending'
     )
 
     db.session.add(new_pto)
@@ -90,7 +91,7 @@ def request_pto():
 @users_bp.route('/pto/<int:pto_id>', methods=['PUT'])
 @jwt_required()
 def update_pto_status(pto_id):
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     # Only managers can approve/reject PTO requests
@@ -109,3 +110,29 @@ def update_pto_status(pto_id):
     db.session.commit()
     
     return jsonify({'message': f'PTO request {data["status"]}'}), 200
+
+
+@users_bp.route('/pto', methods=['GET'])
+@jwt_required()
+def get_pto_requests():
+    current_user_id = int(get_jwt_identity())
+    user = User.query.get(current_user_id)
+
+    # If manager, show all requests; otherwise only show their own
+    if user.is_manager:
+        pto_requests = PTORequest.query.all()
+    else:
+        pto_requests = PTORequest.query.filter_by(user_id=current_user_id).all()
+
+    def serialize_request(req):
+        return {
+            'id': req.id,
+            'start_date': req.start_date.isoformat(),
+            'end_date': req.end_date.isoformat(),
+            'reason': req.reason,
+            'status': req.status,
+            'user_id': req.user_id,
+            'approver_id': req.approver_id
+        }
+
+    return jsonify([serialize_request(req) for req in pto_requests]), 200
