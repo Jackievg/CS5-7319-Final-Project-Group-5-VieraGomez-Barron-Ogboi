@@ -68,16 +68,40 @@ const CompanyCalendar = () => {
   
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100 bg-white">
-      <div className="card p-4 shadow" style={{ maxWidth: '700px', width: '100%' }}>
-        <h2 className="text-center mb-4">📅 Company Calendar</h2>
-        <Calendar
-          onChange={setDate}
-          value={date}
-          tileContent={tileContent}
-        />
+    <div className="bg-light" style={{ minHeight: '100vh', padding: '2rem' }}>
+    <div 
+      className="card mx-auto shadow"
+      style={{
+        maxWidth: '1000px',
+        padding: '2rem',
+        borderRadius: '20px',
+        backgroundColor: '#ffffff',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+      }}
+    >
+      <h2 className="text-center mb-4" style={{ color: '#6c5ce7' }}>
+         Company Calendar View 
+      </h2>
+      <div className="d-flex justify-content-center">
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '800px',
+          }}
+        >
+          <Calendar
+            onChange={setDate}
+            value={date}
+            tileContent={tileContent}
+            className="w-100"
+          />
+          <p className="text-center mt-4" style={{ fontStyle: 'italic', color: '#636e72' }}>
+  "Small steps every day lead to big journeys. You've got this!"
+</p>
+        </div>
       </div>
     </div>
+  </div>
   );
 };
 
