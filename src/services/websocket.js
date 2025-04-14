@@ -6,7 +6,7 @@ let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 5;
 
 export const connectWebSocket = (userId, onMessageReceived) => {
-  const socket = new SockJS('http://localhost:8080/ws');
+  const socket = new SockJS('http://localhost:5000/ws');
   stompClient = new Client({
     webSocketFactory: () => socket,
     reconnectDelay: 5000,
