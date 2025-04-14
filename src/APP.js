@@ -20,17 +20,22 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
+  //event_driven
+  const handleRealTimeUpdate = (message) => {
+    console.log('Handling real-time update:', message);
+    // Implement update logic here based on message.eventType
+  };
+
   useEffect(() => {
     // Check if user is logged in
     const currentUser = authService.getCurrentUser();
-   // console.log("Current user:", currentUser); 
-   //chnaged
+   
     setUser(currentUser);
     setLoading(false);
 
     if (currentUser && process.env.REACT_APP_USE_EVENTS === 'true') {
       const ws = connectWebSocket(currentUser.id, (message) => {
-        console.log('Received message:', message);
+        handleRealTimeUpdate('Received message:', message);
       });
 
       ws.onConnect = () => setConnectionStatus('connected');
@@ -40,8 +45,9 @@ function App() {
       return () => {
         disconnectWebSocket();
       };
+    } else {
+      setConnectionStatus('layered-mode');
     }
-
   }, []);
 
   const handleLogin = (userData) => {
@@ -59,7 +65,7 @@ function App() {
     // Connect WebSocket after login
 
     if (process.env.REACT_APP_USE_EVENTS === 'true') {
-      const ws = connectWebSocket(userData.user_id, console.log);
+      const ws = connectWebSocket(userData.user_id, handleRealTimeUpdate);
       ws.onConnect = () => setConnectionStatus('connected');
     }
   };
