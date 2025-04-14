@@ -41,7 +41,6 @@ const fetchWithFallback = async (url, options = {}) => {
     return await response.json();
   } catch (error) {
     console.error('Fetch error, trying axios:', error);
-    // Fallback to axios
     const method = options.method || 'GET';
     try {
       const axiosResponse = await api({
@@ -57,7 +56,10 @@ const fetchWithFallback = async (url, options = {}) => {
   }
 };
 
-
+const getCurrentUser = () => {
+  const userStr = localStorage.getItem('user');
+  return userStr ? JSON.parse(userStr) : null;
+};
 
 // Auth services
 export const authService = {
@@ -80,17 +82,70 @@ export const authService = {
 export const taskService = {
   getTasks: () => fetchWithFallback('/tasks'),
   getTask: (id) => fetchWithFallback(`/tasks/${id}`),
-  createTask: (taskData) => api.post('/tasks', taskData),
-  updateTask: (id, taskData) => api.put(`/tasks/${id}`, taskData),
-  deleteTask: (id) => api.delete(`/tasks/${id}`),
+  createTask: async (taskData) => {
+    const response = await api.post('/tasks', taskData);
+    if (USE_EVENT_DRIVEN && response.data?.id) {
+      sendMessage('/app/tasks.create', {
+        eventType: 'TASK_CREATED',
+        task: response.data
+      });
+    }
+    return response;
+  },
+  updateTask: async (id, taskData) => {
+    const response = await api.put(`/tasks/${id}`, taskData);
+    if (USE_EVENT_DRIVEN && response.data?.id) {
+      sendMessage('/app/tasks.update', {
+        eventType: 'TASK_UPDATED',
+        task: response.data
+      });
+    }
+    return response;
+  },
+  deleteTask: async (id) => {
+    const response = await api.delete(`/tasks/${id}`);
+    if (USE_EVENT_DRIVEN) {
+      sendMessage('/app/tasks.delete', {
+        eventType: 'TASK_DELETED',
+        taskId: id
+      });
+    }
+    return response;
+  },
+  shareTask: async (taskId, userIds) => {
+    const response = await api.post(`/tasks/${taskId}/share`, { user_ids: userIds });
+    if (USE_EVENT_DRIVEN && response.data?.id) {
+      sendMessage('/app/tasks.share', {
+        eventType: 'TASK_SHARED',
+        task: response.data
+      });
+    }
+    return response;
+  }
 };
 
-
-// PTO services
 export const ptoService = {
-  requestPTO: (ptoData) => api.post('/pto', ptoData),
-  getPTORequests: () => fetchWithFallback('/pto'),
-  updatePTOStatus: (id, statusData) => api.put(`/pto/${id}`, statusData),
+  requestPTO: async (ptoData) => {
+    const response = await api.post('/pto', ptoData);
+    if (USE_EVENT_DRIVEN && response.data?.id) {
+      sendMessage('/app/pto.request', {
+        eventType: 'PTO_REQUESTED',
+        pto: response.data
+      });
+    }
+    return response;
+  },
+  updatePTOStatus: async (id, statusData) => {
+    const response = await api.put(`/pto/${id}`, statusData);
+    if (USE_EVENT_DRIVEN && response.data?.id) {
+      sendMessage('/app/pto.update', {
+        eventType: 'PTO_UPDATED',
+        pto: response.data
+      });
+    }
+    return response;
+  },
+  getPTORequests: () => fetchWithFallback('/pto')
 };
 
 export default api;
