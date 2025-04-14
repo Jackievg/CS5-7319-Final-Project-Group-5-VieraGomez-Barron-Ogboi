@@ -66,7 +66,18 @@ const Dashboard = () => {
           <ul className="list-group">
             {tasks.map((task) => (
               <li key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
-                <span>{task.title}</span>
+                <div>
+              <strong>{task.title}</strong><br />
+  {task.completed ? (
+    <span className="text-success">Complete</span>
+  ) : (
+    task.deadline ? (
+      <span className="text-muted">Deadline: {task.deadline}</span>
+    ) : (
+      <span className="text-muted">No deadline set</span>
+    )
+  )}
+</div>
                 <div>
                   <button
                     className="btn btn-warning btn-sm mx-2"
@@ -88,7 +99,9 @@ const Dashboard = () => {
 
         {/* Other Dashboard Actions */}
         <div className="mt-4 d-flex justify-content-around">
-          <button className="btn btn-outline-secondary">Calendar</button>
+          <Link to="/calendar" className="btn btn-outline-secondary">
+            Calender
+          </Link>
           <Link to="/create-task" className="btn btn-outline-success">
             Create New Task
           </Link>
