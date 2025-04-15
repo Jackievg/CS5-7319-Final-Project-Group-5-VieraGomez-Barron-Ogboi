@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { authService } from '../services/API.js';
 import { connectWebSocket, disconnectWebSocket, sendMessage } from '../services/websocket';
 
-
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
 
@@ -12,8 +11,8 @@ const Dashboard = () => {
     const fetchTasks = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-          console.error('No token found!');
-          return;
+        console.error('No token found!');
+        return;
       }
       const response = await fetch('http://localhost:5000/tasks', {
         headers: {
@@ -31,24 +30,23 @@ const Dashboard = () => {
 
     fetchTasks();
 
-// Set up WebSocket for real-time updates
-const user = JSON.parse(localStorage.getItem('user'));
-if (user && user.id) {
-  const ws = connectWebSocket(user.id, (message) => {
-    if (message.eventType === 'TASK_UPDATED') {
-      setTasks(prev => prev.map(t => t.id === message.task.id ? message.task : t));
-    } else if (message.eventType === 'TASK_CREATED') {
-      setTasks(prev => [...prev, message.task]);
-    } else if (message.eventType === 'TASK_DELETED') {
-      setTasks(prev => prev.filter(t => t.id !== message.taskId));
+    // Set up WebSocket for real-time updates
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.id) {
+      const ws = connectWebSocket(user.id, (message) => {
+        if (message.eventType === 'TASK_UPDATED') {
+          setTasks(prev => prev.map(t => t.id === message.task.id ? message.task : t));
+        } else if (message.eventType === 'TASK_CREATED') {
+          setTasks(prev => [...prev, message.task]);
+        } else if (message.eventType === 'TASK_DELETED') {
+          setTasks(prev => prev.filter(t => t.id !== message.taskId));
+        }
+      });
+
+      return () => {
+        disconnectWebSocket();
+      };
     }
-  });
-
-  return () => {
-    disconnectWebSocket();
-  };
-}
-
   }, []);
 
   const handleEdit = (taskId) => {
@@ -89,44 +87,46 @@ if (user && user.id) {
         {/* Display User's Tasks */}
         <div className="mt-4">
           <h4>Your Tasks:</h4>
-          <ul className="list-group">
-            {tasks.map((task) => (
-              <li key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-              <strong>{task.title}</strong><br />
-  {task.completed ? (
-    <span className="text-success">Complete</span>
-  ) : (
-    task.deadline ? (
-      <span className="text-muted">Deadline: {task.deadline}</span>
-    ) : (
-      <span className="text-muted">No deadline set</span>
-    )
-  )}
-</div>
-                <div>
-                  <button
-                    className="btn btn-warning btn-sm mx-2"
-                    onClick={() => handleEdit(task.id)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleDelete(task.id)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+            <ul className="list-group">
+              {tasks.map((task) => (
+                <li key={task.id} className="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>{task.title}</strong><br />
+                    {task.completed ? (
+                      <span className="text-success">Complete</span>
+                    ) : (
+                      task.deadline ? (
+                        <span className="text-muted">Deadline: {task.deadline}</span>
+                      ) : (
+                        <span className="text-muted">No deadline set</span>
+                      )
+                    )}
+                  </div>
+                  <div>
+                    <button
+                      className="btn btn-warning btn-sm mx-2"
+                      onClick={() => handleEdit(task.id)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleDelete(task.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
 
         {/* Other Dashboard Actions */}
         <div className="mt-4 d-flex justify-content-around">
           <Link to="/calendar" className="btn btn-outline-secondary">
-            Calender
+            Calendar
           </Link>
           <Link to="/create-task" className="btn btn-outline-success">
             Create New Task
