@@ -1,3 +1,4 @@
+
 from flask import Flask, render_template, request
 from flask_cors import CORS
 from extensions import db, jwt
@@ -37,3 +38,4 @@ def create_app(config_object=config.DevelopmentConfig):  # Reference the class w
 if __name__ == "__main__":
     app = create_app()
     app.run(debug=True)
+

@@ -2,7 +2,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 const USE_EVENT_DRIVEN = process.env.REACT_APP_USE_EVENTS === 'true';
-const WS_URL = process.env.REACT_APP_WS_URL || 'http://localhost:8080';
+const WS_URL = process.env.REACT_APP_WS_URL || 'http://localhost:5000';
 
 let stompClient = null;
 let reconnectAttempts = 0;
