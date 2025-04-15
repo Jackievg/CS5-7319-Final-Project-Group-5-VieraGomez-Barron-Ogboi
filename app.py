@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request,  make_response
 from flask_cors import CORS
 from extensions import db, jwt
 import config  # Import the config module correctly
@@ -24,7 +24,14 @@ def create_app(config_object=config.DevelopmentConfig):  # Reference the class w
     @app.before_request
     def before_request():
         if request.method == "OPTIONS":
-            return '', 200  # Return OK for preflight requests
+            # Manually add CORS headers to the preflight response
+            response = make_response('', 200)  # Respond with 200 OK
+            response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'  # Allow the origin you want
+            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'  # Allowed methods
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'  # Allowed headers
+            response.headers['Access-Control-Allow-Credentials'] = 'true'  # Support credentials
+            return response
+
         
     @app.route('/')
     def index():
