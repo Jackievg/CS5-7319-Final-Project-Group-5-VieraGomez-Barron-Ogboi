@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request
 from flask_cors import CORS
 from extensions import db, jwt
 import config
 
 def create_app(config_object=config.DevelopmentConfig):
     app = Flask(__name__)
+
+    # Use Flask-CORS to handle CORS requests and preflight handling automatically
     CORS(app, origins=["http://localhost:3000", "http://localhost:3001"], supports_credentials=True)
 
     app.config.from_object(config_object)
@@ -17,27 +19,6 @@ def create_app(config_object=config.DevelopmentConfig):
 
     app.register_blueprint(tasks_bp)
     app.register_blueprint(users_bp)
-    
-    # Explicitly handle preflight (OPTIONS) requests
-    @app.before_request
-    def before_request():
-        if request.method == "OPTIONS":
-            # Manually add CORS headers to the preflight response
-            response = make_response('', 200)  # Respond with 200 OK
-            response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'  # Allow the origin you want
-            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'  # Allowed methods
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'  # Allowed headers
-            response.headers['Access-Control-Allow-Credentials'] = 'true'  # Support credentials
-            return response
-
-    # Add CORS headers to actual responses
-    @app.after_request
-    def after_request(response):
-        response.headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'  # Allow origin
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'  # Allow methods
-        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'  # Allow headers
-        response.headers['Access-Control-Allow-Credentials'] = 'true'  # Support credentials
-        return response
 
     @app.route('/')
     def index():
@@ -51,4 +32,5 @@ def create_app(config_object=config.DevelopmentConfig):
 if __name__ == "__main__":
     app = create_app()
     app.run(debug=True)
+
 
