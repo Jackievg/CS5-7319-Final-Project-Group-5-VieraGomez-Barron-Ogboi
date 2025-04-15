@@ -7,7 +7,7 @@ def create_app(config_object=config.DevelopmentConfig):
     app = Flask(__name__)
 
     # Use Flask-CORS to handle CORS requests and preflight handling automatically
-    CORS(app, origins=["http://localhost:3000", "http://localhost:3001"], supports_credentials=True)
+    CORS(app, origins=["http://localhost:3000", "http://localhost:3001", "http://localhost:5000"], supports_credentials=True)
 
     app.config.from_object(config_object)
     
