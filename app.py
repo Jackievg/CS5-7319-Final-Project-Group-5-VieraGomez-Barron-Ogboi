@@ -7,8 +7,8 @@ import config  # Import the config module correctly
 
 def create_app(config_object=config.DevelopmentConfig):  # Reference the class within 'config'
     app = Flask(__name__)
-    CORS(app, origins="http://localhost:3000", supports_credentials=True)
-    
+    CORS(app, origins=r"http://localhost:\d+", supports_credentials=True)
+
     app.config.from_object(config_object)
     
     db.init_app(app)
