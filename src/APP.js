@@ -46,7 +46,7 @@ function App() {
         disconnectWebSocket();
       };
     } else {
-      setConnectionStatus('layered-mode');
+      setConnectionStatus('event-driven mode');
     }
   }, []);
 

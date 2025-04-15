@@ -1,90 +1,142 @@
-import { Client } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
-
+// src/services/websocket.js
 const USE_EVENT_DRIVEN = process.env.REACT_APP_USE_EVENTS === 'true';
-const WS_URL = process.env.REACT_APP_WS_URL || 'http://localhost:5000';
-
-let stompClient = null;
-let reconnectAttempts = 0;
+const WS_URL = process.env.REACT_APP_WS_URL || 'ws://localhost:5001'; // Default to Flask-SocketIO port
 const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_DELAY = 3000;
 
-export const connectWebSocket = (userId, onMessageReceived) => {
-  if (!USE_EVENT_DRIVEN) {
-    return {
-      onConnect: () => {},
-      onStompError: () => {},
-      onWebSocketClose: () => {},
-      deactivate: () => {}
-    };
+let socket = null;
+let reconnectAttempts = 0;
+let reconnectTimer = null;
+
+// Event listeners storage
+const eventListeners = {
+  open: [],
+  message: [],
+  error: [],
+  close: []
+};
+
+const addEventListener = (type, callback) => {
+  if (eventListeners[type]) {
+    eventListeners[type].push(callback);
   }
+};
 
-  const socket = new SockJS(`${WS_URL}/ws`);
-  stompClient = new Client({
-    webSocketFactory: () => socket,
-    reconnectDelay: 5000,
-    heartbeatIncoming: 4000,
-    heartbeatOutgoing: 4000,
-    debug: (str) => console.log('STOMP: ' + str),
-  });
+const removeEventListener = (type, callback) => {
+  if (eventListeners[type]) {
+    eventListeners[type] = eventListeners[type].filter(cb => cb !== callback);
+  }
+};
 
-  stompClient.onConnect = (frame) => {
+const triggerEvent = (type, ...args) => {
+  if (eventListeners[type]) {
+    eventListeners[type].forEach(callback => callback(...args));
+  }
+};
+
+const connect = (userId) => {
+  if (!USE_EVENT_DRIVEN || socket) return;
+
+  console.log(`Connecting WebSocket to ${WS_URL}...`);
+  socket = new WebSocket(`${WS_URL}/socket.io/?user_id=${userId}`);
+
+  socket.onopen = () => {
     reconnectAttempts = 0;
-    console.log('Connected: ' + frame);
-    
-    stompClient.subscribe(`/user/${userId}/queue/updates`, (message) => {
-      onMessageReceived(JSON.parse(message.body));
-    });
-
-    stompClient.subscribe('/topic/tasks', (message) => {
-      onMessageReceived(JSON.parse(message.body));
-    });
-
-    stompClient.subscribe('/topic/pto', (message) => {
-      onMessageReceived(JSON.parse(message.body));
-    });
+    console.log('WebSocket connected');
+    triggerEvent('open');
   };
 
-  stompClient.onStompError = (frame) => {
-    console.error('Broker reported error: ' + frame.headers['message']);
-  };
-
-  stompClient.onWebSocketError = (error) => {
-    console.error('WebSocket error:', error);
-    if (reconnectAttempts++ >= MAX_RECONNECT_ATTEMPTS) {
-      console.error('Max reconnection attempts reached');
-      stompClient.deactivate();
+  socket.onmessage = (event) => {
+    try {
+      const message = JSON.parse(event.data);
+      triggerEvent('message', message);
+    } catch (error) {
+      console.error('Failed to parse WebSocket message:', error);
+      triggerEvent('error', error);
     }
   };
 
-  stompClient.onWebSocketClose = () => {
-    console.log('WebSocket connection closed');
+  socket.onerror = (error) => {
+    console.error('WebSocket error:', error);
+    triggerEvent('error', error);
+    attemptReconnect(userId);
   };
 
-  stompClient.activate();
-  return stompClient;
+  socket.onclose = () => {
+    console.log('WebSocket disconnected');
+    triggerEvent('close');
+    attemptReconnect(userId);
+  };
 };
 
-export const disconnectWebSocket = () => {
-  if (stompClient !== null) {
-    stompClient.deactivate();
-    stompClient = null;
+const attemptReconnect = (userId) => {
+  if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+    console.error('Max reconnection attempts reached');
+    return;
   }
+
+  clearTimeout(reconnectTimer);
+  reconnectAttempts++;
+
+  console.log(`Attempting reconnect (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+  reconnectTimer = setTimeout(() => connect(userId), RECONNECT_DELAY);
 };
 
-export const sendMessage = (destination, body) => {
-  if (stompClient && stompClient.connected) {
+const disconnect = () => {
+  if (socket) {
+    console.log('Disconnecting WebSocket...');
+    socket.onclose = null; // Prevent reconnect attempts
+    socket.close();
+    socket = null;
+  }
+  clearTimeout(reconnectTimer);
+};
+
+const send = (data) => {
+  if (socket && socket.readyState === WebSocket.OPEN) {
     try {
-      stompClient.publish({
-        destination,
-        body: JSON.stringify(body),
-        headers: { 'content-type': 'application/json' }
-      });
+      socket.send(JSON.stringify(data));
       return true;
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error sending WebSocket message:', error);
       return false;
     }
   }
   console.warn('WebSocket not connected - message not sent');
   return false;
+};
+
+export const connectWebSocket = (userId, onMessage) => {
+  if (!USE_EVENT_DRIVEN) {
+    return {
+      disconnect: () => {},
+      send: () => false
+    };
+  }
+
+  // Add message listener
+  addEventListener('message', onMessage);
+
+  // Connect if not already connected
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    connect(userId);
+  }
+
+  return {
+    disconnect: () => {
+      removeEventListener('message', onMessage);
+      if (eventListeners.message.length === 0) {
+        disconnect();
+      }
+    },
+    send
+  };
+};
+
+export const disconnectWebSocket = () => {
+  disconnect();
+};
+
+export const sendMessage = (data) => {
+  return send(data);
 };
