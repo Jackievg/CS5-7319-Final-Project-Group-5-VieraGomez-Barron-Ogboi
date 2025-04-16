@@ -1,6 +1,7 @@
 Task Manager Application
 
 Overview 
+
 The Task Manager is a full-stack web application that allows employees to manage task, request paid time off(PTO), and stay updated on company events. The application supports user authentication, task sharing, manager-specific privileges, and calendar visualization.
 
 
