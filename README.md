@@ -99,48 +99,75 @@ Frontend (React)
 API Endpoints
 
 User Autherntication
+
 º POST/register - Register a new user
+
 º POST/login - Aunthenticate a user and receive JWT token
 
 Task Managment 
+
 º GET/tasks - Get all tasks for authenticated user 
+
 º POST/ task - Create a new task
+
 º GET/tasks/:id - Get a specific task
+
 º PUT/tasks/:id - Update a task
+
 º DELETE/task/:id - Delete a task
 
 PTO Managment 
+
 º GET/pto - Get all PTO request
+
 º POST/pto - Create a new PTO request
+
 º PUT/pto/:id - Update PTO request status (for managers)
 
 Company Events 
+
 º Get/tasks/events - Get all company events 
+
 º POST/task/events - Create a new company event (for managers)
 
 User Roles
 
 Regular Users
+
 º Create and manage their own tasks
+
 º Share tasks with other users 
+
 º Submit PTO request
+
 º View company calendar and events 
 
 Managers
+
 º All regular user capabilities 
+
 º Approve or reject PTO requests
+
 º Create company-wide events
 
 Database Schema 
 
 The application uses the following datbase models:
+
 º User - Stores user information
+
 º Task - Stores task information
+
 º TaskShare - Manages task sharing between users 
+
 º PTORequest - Manages PTO requests and approvals 
+
 º CompanyEvent - Stores company-wide events
 
 Future Improvements 
+
 º Pagination and search
+
 º Email notifications
+
 º Enhanced calendar with filters 
