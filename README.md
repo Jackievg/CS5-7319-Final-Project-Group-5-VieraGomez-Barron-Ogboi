@@ -6,31 +6,49 @@ The Task Manager is a full-stack web application that allows employees to manage
 
 
 Features 
+
 º User registration and login (JWT-authenthicated)
+
 º Task creation, updating, deletion
+
 º Task sharing with other 
+
 º PTO request submission and approval by managers 
+
 º Company-wide event managment by managers 
+
 º Responsive calendar with task visualization
+
 º Role-based access control for regular users and managers 
 
 Teck Stack
 
 Backend
+
 º Flask (Python)
+
 º Flask-JWT-Extended (JWT authentication)
+
 º Flask-CORS
+
 º SQLAlchemy (ORM)
+
 º SQLite (default database, configurable)
 
 Frontend
+
 º React
+
 º Bootstrap
+
 º React Router
+
 º React Calendar
+
 º Axios (for API calls)
 
 Project Structure 
+
 project/
 ├── backend/
 │   ├── models.py           # Database models
@@ -40,6 +58,7 @@ project/
 │   ├── RoutesTask.py       # Task-related routes
 │   └── RoutesUsers.py      # User-related routes
 │
+
 └── frontend/
     ├── src/
     │   ├── components/     # React components
