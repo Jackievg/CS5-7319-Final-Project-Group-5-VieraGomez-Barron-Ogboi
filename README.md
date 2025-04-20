@@ -76,6 +76,8 @@ project/
     └── public/             # Static files
 
 Setup Instructions
+
+
 You will need to create two separate terminals ( one for the backend commands, one for the front end commands)
 
 Backend (Flask)
@@ -90,7 +92,11 @@ Backend (Flask)
 	export FLASK_ENV=development
 	flask run
 
+
+
 should your computer allow it/ all flask dependencies are installed, you can also run:
+
+
 python app.py
 
 Frontend (React)
